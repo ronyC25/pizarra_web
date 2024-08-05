@@ -1,0 +1,15 @@
+--subir archivos al GitHub
+
+git init
+git add README.md
+git commit -m "first commit"
+git branch -M main
+git remote add origin https://github.com/ronyC25/pizarra_web.git
+git push -u origin main
+
+--------------------------------------------
+--si el repositorio ya esta creado
+
+git remote add origin https://github.com/ronyC25/pizarra_web.git
+git branch -M main
+git push -u origin main

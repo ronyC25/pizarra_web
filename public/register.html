@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="register-container">
+        <h2>Register</h2>
+        <form id="registerForm">
+            <input type="text" id="name" placeholder="Name" required>
+            <input type="email" id="email" placeholder="Email" required>
+            <input type="password" id="password" placeholder="Password" required>
+            <select id="role">
+                <option value="docente">Docente</option>
+                <option value="alumno">Alumno</option>
+            </select>
+            <button type="submit">Register</button>
+        </form>
+        <p>¿Ya tienes una cuenta? <a href="login.html">Inicia sesión aquí</a></p>
+    </div>
+    <script src="scripts.js"></script>
+    <script>
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const role = document.getElementById('role').value;
+            const response = await fetch('/api/auth/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ nombre: name, email, password, rol: role })
+            });
+            const data = await response.json();
+            if (response.ok) {
+                alert('Registro exitoso. Por favor, inicia sesión.');
+                window.location.href = 'login.html';
+            } else {
+                alert('Register failed: ' + data.message);
+            }
+        });
+    </script>
+</body>
+</html>

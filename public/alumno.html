@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pizarra Virtual - Alumno</title>
+    <link rel="stylesheet" href="styles-alumno.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha512-Fo3rlrQkzjZl6x/MtpW1mFRuh3oQhQt5Rhyh/1esxw5oHeDhZIhPfs2dV/qtvBbWDEmRbE8bM5oXGr6L8p2ZzQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body>
+    <div class="menu">
+        <h2>Bienvenido, <span id="userName"></span></h2>
+        <button id="logoutButton" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</button>
+    </div>
+    <div class="container">
+        <div class="header">
+            <h3>Pizarras Disponibles</h3>
+            <select id="docenteSelect" class="docente-select">
+                <option value="">Seleccione un docente</option>
+                <!-- Opciones de docentes se llenarán dinámicamente -->
+            </select>
+        </div>
+        <div id="boardList" class="board-list"></div>
+    </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="scripts.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const socket = io("http://localhost:4000");
+            const userNameElement = document.getElementById('userName');
+            const userName = localStorage.getItem('nombre');
+            if (userName) {
+                userNameElement.textContent = userName;
+            } else {
+                window.location.href = 'login.html';
+            }
+
+            const boardList = document.getElementById('boardList');
+            const docenteSelect = document.getElementById('docenteSelect');
+
+            // Obtener la lista de docentes
+            const fetchDocentes = async () => {
+                const response = await fetch('http://localhost:4000/api/users?role=docente');
+                const docentes = await response.json();
+                docentes.forEach(docente => {
+                    const option = document.createElement('option');
+                    option.value = docente.id;
+                    option.textContent = docente.nombre;
+                    docenteSelect.appendChild(option);
+                });
+            };
+
+            const fetchBoards = async (id_docente) => {
+                const response = await fetch(`http://localhost:4000/api/boards/docente/${id_docente}`);
+                const boards = await response.json();
+                boardList.innerHTML = '';
+                boards.forEach(board => {
+                    const boardCard = document.createElement('div');
+                    boardCard.classList.add('board-card');
+                    boardCard.innerHTML = `
+                        <h4>${board.nombre}</h4>
+                        <a href="pizarra.html?id=${board.id}" class="btn-open"><i class="fas fa-chalkboard"></i> Abrir Pizarra</a>
+                    `;
+                    boardCard.dataset.id = board.id;
+                    boardList.appendChild(boardCard);
+                });
+            };
+
+            docenteSelect.addEventListener('change', () => {
+                const selectedDocente = docenteSelect.value;
+                fetchBoards(selectedDocente);
+            });
+
+            socket.on('boardCreated', (board) => {
+                const selectedDocente = docenteSelect.value;
+                if (board.id_docente == selectedDocente) {
+                    const boardCard = document.createElement('div');
+                    boardCard.classList.add('board-card');
+                    boardCard.innerHTML = `
+                        <h4>${board.nombre}</h4>
+                        <a href="pizarra.html?id=${board.id}" class="btn-open"><i class="fas fa-chalkboard"></i> Abrir Pizarra</a>
+                    `;
+                    boardCard.dataset.id = board.id;
+                    boardList.appendChild(boardCard);
+                }
+            });
+
+            socket.on('boardDeleted', (boardId) => {
+                const boardCard = document.querySelector(`.board-card[data-id='${boardId}']`);
+                if (boardCard) {
+                    boardCard.remove();
+                }
+            });
+
+            fetchDocentes();
+        });
+
+        function parseJwt(token) {
+            try {
+                const base64Url = token.split('.')[1];
+                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                }).join(''));
+                return JSON.parse(jsonPayload);
+            } catch (error) {
+                return null;
+            }
+        }
+    </script>
+</body>
+</html>

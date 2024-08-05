@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pizarra Interactiva</title>
+    <link rel="stylesheet" href="styles-pizarra.css">
+</head>
+<body>
+    <div class="menu">
+        <h2>Bienvenido, <span id="userName"></span></h2>
+        <h3>Pizarra: <span id="boardName"></span></h3>
+        <button id="logoutButton" class="btn-logout">Cerrar Sesión</button>
+        <div class="tools">
+            <label for="colorPicker">Color:</label>
+            <input type="color" id="colorPicker" class="tool-button">
+            <button id="eraserButton" class="tool-button">Borrador</button>
+            <button id="rectButton" class="tool-button">Rectángulo</button>
+            <button id="circleButton" class="tool-button">Círculo</button>
+            <button id="lineButton" class="tool-button">Línea</button>
+            <button id="saveButton" class="tool-button">Guardar</button> <!-- Botón para guardar -->
+        </div>
+    </div>
+    <div class="container">
+        <canvas id="boardCanvas"></canvas>
+    </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="scripts-pizarra.js"></script>
+</body>
+</html>
